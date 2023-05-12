@@ -17,7 +17,7 @@ jobs:
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
@@ -26,9 +26,9 @@ jobs:
         push: true
         tags: scuba13/amacoon_nginx:latest
 
-    # - name: Trigger Deploy to AWS Lightsail
-    #   uses: peter-evans/repository-dispatch@v1
-    #   with:
-    #     token: ${{ secrets.REPO_ACCESS_TOKEN }}
-    #     repository: scuba13/AmacoonDocker
-    #     event-type: new_docker_image
+    - name: Trigger Deploy to AWS Lightsail
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: scuba13/AmacoonDocker
+        event-type: new_docker_image
