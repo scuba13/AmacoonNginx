@@ -1,11 +1,5 @@
 # Usar a imagem base do Nginx
-FROM nginx:latest
+FROM nginx:1.19-alpine
 
 # Copiar o arquivo de configuração para o diretório correto
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expor a porta 80 do contêiner
-EXPOSE 80
-
-# Comando para iniciar o Nginx quando o contêiner for executado
-CMD ["nginx", "-g", "daemon off;"]
+COPY ./nginx.conf /etc/nginx/templates/nginx.conf.template
