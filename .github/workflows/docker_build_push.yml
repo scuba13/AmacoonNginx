@@ -46,7 +46,7 @@ jobs:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: scuba13/AmacoonDocker
         event-type: new_docker_image
-        client-payload: '{"image_ref": "${{ steps.push_image.outputs.image_ref }}", "service": "nginx"}'
+        client-payload: '{"image_ref": ${{ steps.push_image.outputs.image_ref }}, "service": "nginx"}'
     
 
 
