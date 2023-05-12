@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build and Push to Lightsail
 
 on:
   workflow_dispatch:
@@ -11,21 +11,28 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
+    - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
+    
+    - name: Install lightsailctl
+      run: |
+        curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "lightsailctl"
+        chmod +x lightsailctl
+        sudo mv lightsailctl /usr/local/bin/
 
     - name: Build Docker image
       run: docker build -t amacoon-nginx .
-  
+
     - name: Push Docker image to Lightsail
       run: |
         aws lightsail push-container-image --service-name amacoon \
         --label amacoon-nginx \
         --image amacoon-nginx
+
 
     - name: Trigger Deploy to AWS Lightsail
       uses: peter-evans/repository-dispatch@v1
