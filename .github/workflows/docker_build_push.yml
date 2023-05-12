@@ -11,18 +11,21 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: scuba13/amacoon_nginx:latest
+    - name: Build Docker image
+      run: docker build -t amacoon-nginx .
+  
+    - name: Push Docker image to Lightsail
+      run: |
+        aws lightsail push-container-image --service-name amacoon \
+        --label amacoon-nginx \
+        --image amacoon-nginx
 
     - name: Trigger Deploy to AWS Lightsail
       uses: peter-evans/repository-dispatch@v1
