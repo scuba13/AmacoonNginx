@@ -27,11 +27,15 @@ jobs:
     - name: Build Docker image
       run: docker build -t amacoon-nginx .
 
-    - name: Push Docker image to Lightsail
+    - name: Push Docker image to Lightsail and save image reference
+      id: push_image
       run: |
-        aws lightsail push-container-image --service-name amacoon \
-        --label amacoon-nginx \
-        --image amacoon-nginx
+        OUTPUT=$(aws lightsail push-container-image --service-name amacoon --label amacoon-service --image amacoon-service)
+        IMAGE_REF=$(echo "$OUTPUT" | grep -oP ':.*' | awk '{$1=$1;print}')
+        echo "::set-output name=image_ref::$IMAGE_REF"
+    
+    - name: Use image reference
+      run: echo "The image reference is ${{ steps.push_image.outputs.image_ref }}"
 
 
     - name: Trigger Deploy to AWS Lightsail
@@ -40,3 +44,6 @@ jobs:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: scuba13/AmacoonDocker
         event-type: new_docker_image
+        client-payload: '{"image_ref": "${{ steps.push_image.outputs.image_ref }}", "service": "nginx"}'
+    
+
