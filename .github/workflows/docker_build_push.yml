@@ -30,12 +30,13 @@ jobs:
     - name: Push Docker image to Lightsail and save image reference
       id: push_image
       run: |
-        OUTPUT=$(aws lightsail push-container-image --service-name amacoon --label amacoon-service --image amacoon-service)
+        OUTPUT=$(aws lightsail push-container-image --service-name amacoon  --label amacoon-nginx --image amacoon-nginx)
         IMAGE_REF=$(echo "$OUTPUT" | grep -oP ':.*' | awk '{$1=$1;print}')
         echo "::set-output name=image_ref::$IMAGE_REF"
     
     - name: Use image reference
       run: echo "The image reference is ${{ steps.push_image.outputs.image_ref }}"
+    
 
 
     - name: Trigger Deploy to AWS Lightsail
@@ -46,4 +47,6 @@ jobs:
         event-type: new_docker_image
         client-payload: '{"image_ref": "${{ steps.push_image.outputs.image_ref }}", "service": "nginx"}'
     
+
+
 
