@@ -28,11 +28,11 @@ jobs:
         run: docker build -t amacoon-nginx .
         
       - name: Tag Docker image
-        run: docker tag amacoon-nginx:latest 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:latest
+        run: docker tag amacoon-nginx:latest 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:nginx
       
       
       - name: Push Docker image to ECR
-        run: docker push 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:latest
+        run: docker push 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:nginx
     
 
       # - name: Trigger Deploy to AWS Lightsail
