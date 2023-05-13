@@ -1,39 +1,43 @@
-name: Docker Build and Push to ECR
+name: Docker Build and Push
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v2
+      - name: Check out repository
+        uses: actions/checkout@v2
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: Build Docker image
+        run: docker build -t amacoon-nginx .
+        
+      - name: Tag Docker image
+        run: docker tag amacoon-nginx:latest 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:latest
+      
+      
+      - name: Push Docker image to ECR
+        run: docker push 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:latest
     
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-    
-    - name: Build Docker image
-      run: docker build -t amacoon-nginx .
 
-    - name: Tag Docker image
-      run: docker tag amacoon-nginx:latest ${{ steps.login-ecr.outputs.registry }}/amacoon-nginx:latest
-
-    - name: Push Docker image to ECR
-      run: docker push ${{ steps.login-ecr.outputs.registry }}/amacoon-nginx:latest
-
-    - name: Trigger Deploy to AWS Lightsail
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: scuba13/AmacoonDocker
-        event-type: new_docker_image
+      # - name: Trigger Deploy to AWS Lightsail
+      #   uses: peter-evans/repository-dispatch@v1
+      #   with:
+      #     token: ${{ secrets.REPO_ACCESS_TOKEN }}
+      #     repository: scuba13/AmacoonDocker
+      #     event-type: new_docker_image
